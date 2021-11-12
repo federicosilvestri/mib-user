@@ -1,0 +1,52 @@
+version: "3"
+services:
+  db:
+    image: postgres:10
+    restart: on-failure
+    env_file:
+      - env_file
+
+  redis_cache:
+    image: library/redis:6.0.9
+    ports:
+      - "6379:6379"
+
+  worker_base:
+    build: .
+    env_file:
+      - env_file
+    environment:
+      - POSTGRES_HOST=db
+      - REDIS_HOST=redis_cache
+    command: 'false'
+
+  worker:
+    restart: always
+    extends:
+      service: worker_base
+    command: gunicorn --config gunicorn.conf.py wsgi:app
+    ports:
+      - "5000:5000"
+    depends_on:
+      - db
+      - rabbit_mq
+      - migrations
+
+  worker_bg:
+    restart: on-failure
+    extends:
+      service: worker_base
+    command: /bin/bash celery_entry.sh
+    depends_on:
+      - db
+      - rabbit_mq
+      - migrations
+
+  migrations:
+    extends:
+      service: worker_base
+    command: flask db upgrade
+    restart: on-failure
+    depends_on:
+      - db
+      - rabbit_mq
