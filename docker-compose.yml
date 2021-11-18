@@ -1,52 +1,51 @@
-version: "3"
+#
+# Message in A bottle Docker Compose file
+#
+
+version: "3.6"
+
 services:
   db:
-    image: postgres:10
-    restart: on-failure
+    image: postgres:13
+    restart: unless-stopped
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      # this is only for development purpose
+      - "5342:5342"
     env_file:
       - env_file
 
-  redis_cache:
-    image: library/redis:6.0.9
-    ports:
-      - "6379:6379"
+  mib_users:
+    <<: &mib_users
+      # Building the image
+      image: "mib-users:latest"
+      build:
+        context: .
+        dockerfile: Dockerfile 
 
-  worker_base:
-    build: .
+    ports:
+     - "5000:5000"
     env_file:
       - env_file
     environment:
       - POSTGRES_HOST=db
-      - REDIS_HOST=redis_cache
-    command: 'false'
-
-  worker:
-    restart: always
-    extends:
-      service: worker_base
-    command: gunicorn --config gunicorn.conf.py wsgi:app
-    ports:
-      - "5000:5000"
     depends_on:
       - db
-      - rabbit_mq
-      - migrations
-
-  worker_bg:
-    restart: on-failure
-    extends:
-      service: worker_base
-    command: /bin/bash celery_entry.sh
-    depends_on:
-      - db
-      - rabbit_mq
       - migrations
 
   migrations:
-    extends:
-      service: worker_base
+    #
+    # this service is used to apply migrations on db
+    #
+    <<: *mib_users
     command: flask db upgrade
+    env_file:
+      - env_file
+    environment:
+      - POSTGRES_HOST=db
     restart: on-failure
-    depends_on:
-      - db
-      - rabbit_mq
+
+# Declaring all volumes
+volumes:
+  pgdata: # for maintaing db data

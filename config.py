@@ -24,7 +24,6 @@ class DevConfig(DebugConfig):
     SQLALCHEMY_ECHO = False
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
-
 class TestConfig(Config):
     """
     This is the main configuration object for application.
@@ -40,7 +39,7 @@ class TestConfig(Config):
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 
-class ProdConfig(Config):
+class ProdConfig(DevConfig):
     """
     This is the main configuration object for application.
     """
@@ -52,7 +51,6 @@ class ProdConfig(Config):
 
     SQLALCHEMY_ECHO = False
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-
     POSTGRES_USER = os.getenv('POSTGRES_USER', None)
     POSTGRES_PASS = os.getenv('POSTGRES_PASSWORD', None)
     POSTGRES_DB = os.getenv('POSTGRES_DB', None)
@@ -61,3 +59,4 @@ class ProdConfig(Config):
     SQLALCHEMY_DATABASE_URI = 'postgres://%s:%s@%s:%s/%s' % (
         POSTGRES_USER, POSTGRES_PASS, POSTGRES_HOST, POSTGRES_PORT, POSTGRES_DB)
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+

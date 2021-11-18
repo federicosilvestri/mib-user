@@ -2,7 +2,7 @@
 
 This is the source code of Message in a Bottle application, self project of *Advanced Software Engineering* course,
 University of Pisa.
- 
+
 ## Team info
 
 - The *squad id* is **<SQUAD_ID>**
@@ -40,7 +40,6 @@ you can do it by executing the following commands:
 ```shell script
 cp env_file_example env_file
 cp env_file_example .env
-docker-compose up redis
 export FLASK_ENV=development
 flask run
 ```
@@ -52,6 +51,8 @@ To show the primary routes of flask application you can issue the following comm
 
 `flask routes`
 
+The default swagger-ui interface is available on */ui*
+
 #### Executing migrations
 
 If you change something in the models package or you create a new model,
@@ -60,7 +61,7 @@ you have to run these commands to apply the modifications:
 `flask db migrate -m '<message>'`
 
 and
- 
+
 `flask db upgrade`
 
 
@@ -75,6 +76,10 @@ The available environments are:
 
 If you want to run the application with development environment
 you can run the `run.sh` script.
+
+**Note:** if you use `docker-compose up` you are going to startup a production ready microservice, hence postgres will be used as default database and gunicorn will serve your application.
+
+If you are developing application and you want to have the debug tools, you can start application locally (without `docker-compose`) by executing `bash run.sh`.
 
 ### Run tests
 
